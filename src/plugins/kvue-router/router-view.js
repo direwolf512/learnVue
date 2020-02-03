@@ -4,6 +4,7 @@ export default {
 		this.$vnode.data.routerView = true;
 		let parent = this.$parent;
 		let depth = 0;
+		//while 循环会一直循环代码块，只要指定的条件为 true。
 		while (parent) {
 			const vnodeData = parent.$vnode && parent.$vnode.data
 			window.console.log(vnodeData, 11)
@@ -12,6 +13,7 @@ export default {
 					depth++
 				}
 			}
+			// 一直向父级寻找，以确定深度
 			parent = parent.$parent;
 		}
 		// let { routerMap, app } = this.$router;

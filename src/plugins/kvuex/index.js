@@ -5,13 +5,30 @@ class Store {
         window.console.log(options)
         this._mutations = options.mutations
         this._actions = options.actions
+        this._wrappedGetters = options.getters
+
+        const computed = {};
+        this.getters = {}
+        let store = this
+        Object.keys(this._wrappedGetters).forEach(key => {
+            let fn = store._wrappedGetters[key];
+            computed[key] = function () {
+                return fn(store.state)
+            }
+            Object.defineProperty(store.getters, key, {
+                get: () => {
+                    return store._vm[key]
+                }
+            })
+        })
         // this.state = new Vue({
         //     data: options.state
         // })
         this._vm = new Vue({
             data: {
-                $$state: options.state // 加两个$，Vue不做代理，对外部是隐藏的，没办法直接通过_vm访问
-            }
+                $$state: options.state, // 加两个$，Vue不做代理，对外部是隐藏的，没办法直接通过_vm访问
+            },
+            computed // 可以直接通过_vm访问 computed:{a:1} => _vm.a == 1
         })
         // 绑定commit，dispatch上下文为Store实例
         this.commit = this.commit.bind(this)
