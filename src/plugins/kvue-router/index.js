@@ -5,23 +5,46 @@ class KVueRouter {
 	constructor(options) {
 		// options = { routes: [{}, {}] }
 		this.$options = options;
-		this.routerMap = {};
-		options.routes.forEach((route) => {
-			this.routerMap[route.path] = route
-		})
-		this.app = new Vue({
-			data() {
-				return {
-					current: '/'
-				}
-			}
-		})
+		this.current = window.location.hash.slice(1) || '/'
+		Vue.util.defineReactive(this, 'matched', [])
+		this.match();
+		// this.routerMap = {};
+		// options.routes.forEach((route) => {
+		// 	this.routerMap[route.path] = route
+		// })
+		// this.app = new Vue({
+		// 	data() {
+		// 		return {
+		// 			current: '/'
+		// 		}
+		// 	}
+		// })
 		window.addEventListener('hashchange', this.hashChange.bind(this))
 		window.addEventListener('load', this.hashChange.bind(this))
 	}
 
+	match(routes) {
+		routes = routes || this.$options.routes
+		for (const route of routes) {
+			if (route.path === '/' && this.current === '/') {
+				this.matched.push(route)
+				return
+			}
+			if (route.path !== '/' && this.current.indexOf(route.path) > -1) {
+				this.matched.push(route)
+				if (route.children) {
+					this.match(route.children)
+				}
+				return
+			}
+		}
+	}
+
 	hashChange() {
-		this.app.current = window.location.hash.slice(1);
+		// this.app.current = window.location.hash.slice(1);
+		this.current = window.location.hash.slice(1);
+		this.matched = []
+		this.match();
 	}
 }
 

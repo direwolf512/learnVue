@@ -10,20 +10,43 @@ class SelfVueRouter {
         options.routes.forEach(route => {
             this.routesMap[route.path] = route
         });
-        this.app = new Vue({
-            data() {
-                return {
-                    current: '/'
-                }
-            }
-        })
+        // this.app = new Vue({
+        //     data() {
+        //         return {
+        //             current: '/'
+        //         }
+        //     }
+        // })
+        this.current = window.location.hash.slice(1) || '/'
+        Vue.util.defineReactive(this, 'matched', [])
+        this.match()
 
         window.addEventListener('hashchange', this.hashChangeHandle.bind(this))
         window.addEventListener('load', this.hashChangeHandle.bind(this))
     }
 
     hashChangeHandle() {
-        this.app.current = window.location.hash.slice(1);
+        // this.app.current = window.location.hash.slice(1);
+        this.current = window.location.hash.slice(1)
+        this.matched = []
+        this.match()
+    }
+
+    match(routes) {
+        routes = routes || this.$ops.routes
+        for (const route of routes) {
+            if (this.current === '/' && route.path === '/') {
+                this.matched.push(route)
+                return
+            }
+            if (route.path !== '/' && this.current.indexOf(route.path) > -1) {
+                this.matched.push(route)
+                if (route.children) {
+                    this.match(route.children)
+                }
+                return
+            }
+        }
     }
 }
 
